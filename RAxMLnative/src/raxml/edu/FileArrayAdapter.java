@@ -35,8 +35,11 @@ public class FileArrayAdapter extends ArrayAdapter<Option> {
 			TextView t2 = (TextView) v.findViewById(R.id.TextView02);
 			if(t1 != null)
 				t1.setText(o.getName());
-			if(t2 != null)
-				t2.setText(o.getName());
+			if(o.getData().equalsIgnoreCase("Folder")) {
+				// 8 is visiblity status gone
+				t2.setVisibility(8);
+			} else if(t2 != null)
+				t2.setText(o.getData());
 		}
 		return v;
 	}

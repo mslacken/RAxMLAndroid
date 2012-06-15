@@ -17,12 +17,13 @@ private FileArrayAdapter adapter;
 	@Override 
 public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
+	
 	currentDir = new File("/");
 	fill(currentDir);
 }
 private void fill(File f) { 
 	File[]dirs = f.listFiles();
-	this.setTitle("Current directory: " + f.getName());
+	this.setTitle("Current directory: " + f.getAbsolutePath());
 	List<Option>dir = new ArrayList<Option>();
 	List<Option>fls = new ArrayList<Option>();
 	try {
@@ -37,7 +38,7 @@ private void fill(File f) {
 	Collections.sort(dir);
 	Collections.sort(fls);
 	dir.addAll(fls);
-	if(!f.getName().equalsIgnoreCase("sdcard"))
+	if(!f.getName().equalsIgnoreCase(""))
 		dir.add(0,new Option("..","Parent Directory",f.getParent()));
 	adapter = new FileArrayAdapter(FileChooser.this,R.layout.file_view,dir);
 	this.setListAdapter(adapter);
@@ -55,5 +56,12 @@ private void fill(File f) {
 	}
 	private void onFileClick(Option o) {
 		Toast.makeText(this,"File slected:" + o.getName(), Toast.LENGTH_SHORT).show();
+		//Bundle myBundle = FileChooser.this.getIntent().getExtras();
+		Bundle myBundle = new Bundle();
+		//Toast.makeText(this,myBundle.getString("bundle"), Toast.LENGTH_SHORT).show();
+		myBundle.putString("dataFileName",o.getName());
+		FileChooser.this.getIntent().putExtras(myBundle);
+		FileChooser.this.setResult(RESULT_OK, getIntent());
+		FileChooser.this.finish();
 	}
 }

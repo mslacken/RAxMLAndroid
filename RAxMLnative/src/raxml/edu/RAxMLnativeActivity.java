@@ -24,6 +24,7 @@ import android.widget.TextView;
 public class RAxMLnativeActivity<CurrentActivity> extends Activity {
   NativeRAxML nativeLib;
   FileChooser chooser;
+  public String dataFileName;
 
   /** Called when the activity is first created. */
   @Override
@@ -36,6 +37,8 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
     TextView outText = (TextView) findViewById(R.id.textOut);
     outText.setText(helloText);
 
+    TextView dataFileNameText = (TextView) findViewById(R.id.DataFileName);
+    dataFileNameText.setText("First started");
     // Setup the UI
     Button buttonCalc = (Button) findViewById(R.id.buttonCalc);
 
@@ -58,13 +61,18 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
     Button buttonSelect = (Button) findViewById(R.id.buttonSelect);
     buttonSelect.setOnClickListener(new OnClickListener() {
     	TextView result = (TextView) findViewById(R.id.result);
-
 		public void onClick(View v) {
-			result.setText("Want to Choose file?");
 			Intent myIntent = new Intent(RAxMLnativeActivity.this, FileChooser.class);
-			RAxMLnativeActivity.this.startActivity(myIntent);
+			RAxMLnativeActivity.this.startActivityForResult(myIntent,0);
 		}
     	
     });
+  }
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+	super.onActivityResult(requestCode,resultCode,intent);
+	Bundle newBundle = intent.getExtras();
+    TextView dataFileNameText = (TextView) findViewById(R.id.DataFileName);
+    dataFileNameText.setText(newBundle.getString("dataFileName"));
   }
 }

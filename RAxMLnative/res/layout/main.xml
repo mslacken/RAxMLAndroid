@@ -46,10 +46,29 @@
     android:textSize="36sp" 
     android:id="@+id/result"/>
 
+  <TableLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" >
+
+      <TableRow
+          android:id="@+id/tableRow1"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" >
+
+        
+          <TextView
+              android:id="@+id/DataFileName"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="DNA Data" />
   <Button
-      android:id="@+id/buttonSelect"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="Choose source data" />
+              android:id="@+id/buttonSelect"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="..." />
+          
+      </TableRow>
+
+  </TableLayout>
 
 </LinearLayout>
