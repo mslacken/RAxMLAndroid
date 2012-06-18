@@ -8,3 +8,7 @@ JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_hello
 	(JNIEnv * env, jobject obj) {
 		return (*env)->NewStringUTF(env, "Hello World!");
 	}
+JNIEXPORT jint JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
+  (JNIEnv * env, jobject obj, jstring dataFileName, jstring treeFileName, jint parameter1) {
+	  return parameter1*23;
+  }

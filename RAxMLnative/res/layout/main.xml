@@ -23,23 +23,10 @@
     android:layout_height="wrap_content" 
     android:id="@+id/textOut"
     android:text="output" />
-  <EditText android:layout_width="wrap_content"
-    android:layout_height="wrap_content" 
-    android:id="@+id/value1"
-    android:hint="Value 1"/>
-  <TextView android:id="@+id/TextView01" 
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="+"
-    android:textSize="36sp"/>
-  <EditText android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:id="@+id/value2"
-    android:hint="Value 2"/>
   <Button android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:id="@+id/buttonCalc"
-    android:text="="/>
+    android:text="Calculate Tree"/>
   <TextView android:layout_width="wrap_content"
     android:layout_height="wrap_content" 
     android:text="result"
@@ -49,7 +36,6 @@
   <TableLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content" >
-
       <TableRow
           android:id="@+id/tableRow1"
           android:layout_width="wrap_content"
@@ -60,15 +46,52 @@
               android:id="@+id/DataFileName"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="DNA Data" />
-  <Button
-              android:id="@+id/buttonSelect"
+              android:text="dna_data" />
+	  <Button
+              android:id="@+id/buttonSelectData"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="..." />
+          
+      </TableRow>
+      <TableRow
+          android:id="@+id/tableRow2"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" >
+
+        
+          <TextView
+              android:id="@+id/TreeFileName"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="start_tree" />
+	  <Button
+              android:id="@+id/buttonSelectTree"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:text="..." />
           
       </TableRow>
 
+      <TableRow
+          android:id="@+id/tableRow3"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content" >
+	  <TextView
+	      android:id="@+id/parameter1Desc"
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:text="Parameter 1"
+	      android:textAppearance="?android:attr/textAppearanceLarge" />
+	
+	  <EditText
+	      android:id="@+id/parameter1"
+	      android:layout_width="wrap_content"
+	      android:layout_height="wrap_content"
+	      android:text = "32"
+	      android:ems="10" >
+	  </EditText>
+      </TableRow>
   </TableLayout>
 
 </LinearLayout>

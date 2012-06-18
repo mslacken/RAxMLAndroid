@@ -1,20 +1,9 @@
 package raxml.edu;
 
-//import android.app.Activity;
-//import android.os.Bundle;
-
-//public class RAxMLnativeActivity extends Activity {
-//    /** Called when the activity is first created. */
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//       super.onCreate(savedInstanceState);
-//        setContentView(R.layout.main);
-//    }
-//}
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -25,6 +14,10 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
   NativeRAxML nativeLib;
   FileChooser chooser;
   public String dataFileName;
+  public String dataFilePath;
+  public String treeFileName;
+  public String treeFilePath;
+  public int parameter1;
 
   /** Called when the activity is first created. */
   @Override
@@ -36,34 +29,34 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
     // Update the UI
     TextView outText = (TextView) findViewById(R.id.textOut);
     outText.setText(helloText);
-
-    TextView dataFileNameText = (TextView) findViewById(R.id.DataFileName);
-    dataFileNameText.setText("First started");
     // Setup the UI
     Button buttonCalc = (Button) findViewById(R.id.buttonCalc);
-
     buttonCalc.setOnClickListener(new OnClickListener() {
       TextView result = (TextView) findViewById(R.id.result);
-      EditText value1 = (EditText) findViewById(R.id.value1);
-      EditText value2 = (EditText) findViewById(R.id.value2);
 
       public void onClick(View v) {
-        int v1, v2, res = -1;
-        v1 = Integer.parseInt(value1.getText().toString());
-        v2 = Integer.parseInt(value2.getText().toString());
-
-        res = nativeLib.add(v1, v2);
+    	int res = -1;
+	    EditText outParameter1 = (EditText) findViewById(R.id.parameter1);
+    	parameter1 = Integer.parseInt(outParameter1.getText().toString());
+        res = nativeLib.raxml_main(dataFileName,treeFileName,parameter1);
         result.setText(new Integer(res).toString());
       }
 
     });
     
-    Button buttonSelect = (Button) findViewById(R.id.buttonSelect);
-    buttonSelect.setOnClickListener(new OnClickListener() {
-    	TextView result = (TextView) findViewById(R.id.result);
+    Button buttonSelectData = (Button) findViewById(R.id.buttonSelectData);
+    buttonSelectData.setOnClickListener(new OnClickListener() {
 		public void onClick(View v) {
 			Intent myIntent = new Intent(RAxMLnativeActivity.this, FileChooser.class);
 			RAxMLnativeActivity.this.startActivityForResult(myIntent,0);
+		}
+    	
+    });
+    Button buttonSelectTree = (Button) findViewById(R.id.buttonSelectTree);
+    buttonSelectTree.setOnClickListener(new OnClickListener() {
+		public void onClick(View v) {
+			Intent myIntent = new Intent(RAxMLnativeActivity.this, FileChooser.class);
+			RAxMLnativeActivity.this.startActivityForResult(myIntent,1);
 		}
     	
     });
@@ -73,6 +66,16 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
 	super.onActivityResult(requestCode,resultCode,intent);
 	Bundle newBundle = intent.getExtras();
     TextView dataFileNameText = (TextView) findViewById(R.id.DataFileName);
-    dataFileNameText.setText(newBundle.getString("dataFileName"));
+    TextView treeFileNameText = (TextView) findViewById(R.id.TreeFileName);
+    if(requestCode == 0) {
+	    dataFileNameText.setText(newBundle.getString("fileName"));
+	    dataFileName = newBundle.getString("fileName");
+	    dataFilePath = newBundle.getString("pathName");
+    }
+    if(requestCode == 1) {
+	    treeFileNameText.setText(newBundle.getString("fileName"));
+	    treeFileName = newBundle.getString("fileName");
+	    treeFilePath = newBundle.getString("pathName");
+    }
   }
 }

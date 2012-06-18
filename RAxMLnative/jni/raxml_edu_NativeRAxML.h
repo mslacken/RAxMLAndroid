@@ -23,6 +23,14 @@ JNIEXPORT jint JNICALL Java_raxml_edu_NativeRAxML_add
 JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_hello
   (JNIEnv *, jobject);
 
+/*
+ * Class:     raxml_edu_NativeRAxML
+ * Method:    raxml_main
+ * Signature: (Ljava/lang/String;Ljava/lang/String;I)I
+ */
+JNIEXPORT jint JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
+  (JNIEnv *, jobject, jstring, jstring, jint);
+
 #ifdef __cplusplus
 }
 #endif
