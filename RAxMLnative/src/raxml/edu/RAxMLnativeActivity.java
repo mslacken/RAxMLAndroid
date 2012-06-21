@@ -36,12 +36,16 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
 
       public void onClick(View v) {
     	int res = -1;
+    	/*  Get parameters from the UI */
+	    TextView dataFileNameText = (TextView) findViewById(R.id.DataFileName);
+	    TextView treeFileNameText = (TextView) findViewById(R.id.TreeFileName);
 	    EditText outParameter1 = (EditText) findViewById(R.id.parameter1);
+	    dataFileName = dataFileNameText.getText().toString();
+	    treeFileName = treeFileNameText.getText().toString();
     	parameter1 = Integer.parseInt(outParameter1.getText().toString());
         res = nativeLib.raxml_main(dataFileName,treeFileName,parameter1);
         result.setText(new Integer(res).toString());
       }
-
     });
     
     Button buttonSelectData = (Button) findViewById(R.id.buttonSelectData);
@@ -50,7 +54,6 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
 			Intent myIntent = new Intent(RAxMLnativeActivity.this, FileChooser.class);
 			RAxMLnativeActivity.this.startActivityForResult(myIntent,0);
 		}
-    	
     });
     Button buttonSelectTree = (Button) findViewById(R.id.buttonSelectTree);
     buttonSelectTree.setOnClickListener(new OnClickListener() {
@@ -58,7 +61,6 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
 			Intent myIntent = new Intent(RAxMLnativeActivity.this, FileChooser.class);
 			RAxMLnativeActivity.this.startActivityForResult(myIntent,1);
 		}
-    	
     });
   }
   @Override
