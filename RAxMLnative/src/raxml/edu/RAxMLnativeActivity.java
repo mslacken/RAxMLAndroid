@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 public class RAxMLnativeActivity<CurrentActivity> extends Activity {
@@ -17,7 +19,8 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
   public String dataFilePath;
   public String treeFileName;
   public String treeFilePath;
-  public int parameter1;
+  public int model;
+  public boolean useMedian;
 
   /** Called when the activity is first created. */
   @Override
@@ -39,11 +42,24 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
     	/*  Get parameters from the UI */
 	    TextView dataFileNameText = (TextView) findViewById(R.id.DataFileName);
 	    TextView treeFileNameText = (TextView) findViewById(R.id.TreeFileName);
-	    EditText outParameter1 = (EditText) findViewById(R.id.parameter1);
 	    dataFileName = dataFileNameText.getText().toString();
 	    treeFileName = treeFileNameText.getText().toString();
-    	parameter1 = Integer.parseInt(outParameter1.getText().toString());
-        res = nativeLib.raxml_main(dataFileName,treeFileName,parameter1);
+	    /*
+    	useMedian = Integer.parseInt(outParameter1.getText().toString());
+	    EditText outParameter1 = (EditText) findViewById(R.id.parameter1);
+    	*/
+	    Switch useMedianSwitch = (Switch) findViewById(R.id.useMedian);
+	    useMedian = useMedianSwitch.isChecked();
+	    RadioButton catButton = (RadioButton) findViewById(R.id.cat);
+	    RadioButton gammaButton = (RadioButton) findViewById(R.id.gamma);
+	    RadioButton gamma_iButton = (RadioButton) findViewById(R.id.gamma_i);
+	    if(catButton.isSelected()) 
+	    	model = 0;
+	    if(gammaButton.isSelected()) 
+	    	model = 1;
+	    if(gamma_iButton.isSelected()) 
+	    	model = 2;
+        res = nativeLib.raxml_main(dataFileName,treeFileName,model,useMedian);
         result.setText(new Integer(res).toString());
       }
     });

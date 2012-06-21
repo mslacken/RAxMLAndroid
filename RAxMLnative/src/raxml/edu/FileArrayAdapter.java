@@ -1,7 +1,6 @@
 package raxml.edu;
 
 import java.util.List;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;

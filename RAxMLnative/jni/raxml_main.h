@@ -13,3 +13,8 @@
 #include "phylogenetic-likelihood-library/axml.h"
 #include "phylogenetic-likelihood-library/globalVariables.h"
 #endif
+
+/* glue for jni */
+#include <jni.h>
+#define JNI_FALSE  0
+#define JNI_TRUE   1

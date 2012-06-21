@@ -14,5 +14,6 @@ public class NativeRAxML {
 	   * Returns Hello World string
 	   */
 	  public native String hello();
-	  public native int raxml_main(String dataFileName, String treeFileName,int i);
+	  public native int raxml_main(String dataFileName, String treeFileName,int model, boolean useMedian);
 }
+	
