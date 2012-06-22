@@ -7,14 +7,8 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="NDK Demo"
+        android:text="RAxML"
         android:textSize="22sp" />
-
-    <TextView
-        android:id="@+id/textOut"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="output" />
 
     <Button
         android:id="@+id/buttonCalc"
@@ -69,14 +63,13 @@
 		      android:id="@+id/parameter1Desc"
 		      android:layout_width="match_parent"
 		      android:layout_height="wrap_content"
-		      android:text="Parameter 1"
-		      android:textAppearance="?android:attr/textAppearanceLarge" />
+		      android:text="Output file name:"/>
 		  <EditText
-		      android:id="@+id/parameter1"
+		      android:id="@+id/outFileName"
 		      android:layout_width="match_parent"
 		      android:layout_height="wrap_content"
-		      android:text="23"
-		      android:textAppearance="?android:attr/textAppearanceLarge" />
+		      android:text="RAxMLout"
+		      android:textAppearance="?android:attr/textAppearanceMedium" />
       </TableRow>
       <TableRow
           android:id="@+id/tableRow4"
@@ -101,8 +94,12 @@
               android:id="@+id/textView1"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="Model:  "
+              android:text="Model:"
               android:textAppearance="?android:attr/textAppearanceLarge" />
+
+          <Space
+              android:layout_width="10dp"
+              android:layout_height="wrap_content" />
 
       <RadioGroup
           android:id="@+id/radioGroup1"

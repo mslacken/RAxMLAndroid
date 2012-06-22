@@ -19,6 +19,7 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
   public String dataFilePath;
   public String treeFileName;
   public String treeFilePath;
+  public String outFileName;
   public int model;
   public boolean useMedian;
 
@@ -28,10 +29,6 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
     nativeLib = new NativeRAxML();
-    String helloText = nativeLib.hello();
-    // Update the UI
-    TextView outText = (TextView) findViewById(R.id.textOut);
-    outText.setText(helloText);
     // Setup the UI
     Button buttonCalc = (Button) findViewById(R.id.buttonCalc);
     buttonCalc.setOnClickListener(new OnClickListener() {
@@ -42,8 +39,10 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
     	/*  Get parameters from the UI */
 	    TextView dataFileNameText = (TextView) findViewById(R.id.DataFileName);
 	    TextView treeFileNameText = (TextView) findViewById(R.id.TreeFileName);
+	    EditText outFileNameText = (EditText) findViewById(R.id.outFileName);
 	    dataFileName = dataFileNameText.getText().toString();
 	    treeFileName = treeFileNameText.getText().toString();
+	    outFileName = outFileNameText.getText().toString();
 	    /*
     	useMedian = Integer.parseInt(outParameter1.getText().toString());
 	    EditText outParameter1 = (EditText) findViewById(R.id.parameter1);
@@ -53,13 +52,14 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
 	    RadioButton catButton = (RadioButton) findViewById(R.id.cat);
 	    RadioButton gammaButton = (RadioButton) findViewById(R.id.gamma);
 	    RadioButton gamma_iButton = (RadioButton) findViewById(R.id.gamma_i);
-	    if(catButton.isSelected()) 
+	    if(catButton.isChecked()) 
 	    	model = 0;
-	    if(gammaButton.isSelected()) 
+	    if(gammaButton.isChecked()) 
 	    	model = 1;
-	    if(gamma_iButton.isSelected()) 
+	    if(gamma_iButton.isChecked()) 
 	    	model = 2;
-        res = nativeLib.raxml_main(dataFileName,treeFileName,model,useMedian);
+        res = nativeLib.raxml_main(dataFileName,treeFileName,outFileName,
+        		model,useMedian);
         result.setText(new Integer(res).toString());
       }
     });

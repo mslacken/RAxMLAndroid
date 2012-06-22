@@ -1,5 +1,5 @@
-#ifndef RAXML_MAIN_H
-#define RAXML_MAIN_H
+#ifndef ANDROID_HELPERS_H
+#define ANDROID_HELPERS_H
 /* system includes, shoudl be compatible to stdclib */
 #include <math.h>
 #include <time.h>
@@ -11,14 +11,4 @@
 #include <limits.h>
 /* raxml includes */
 #include "phylogenetic-likelihood-library/axml.h"
-#include "phylogenetic-likelihood-library/globalVariables.h"
-
-/* glue for jni */
-#include <jni.h>
-#define JNI_FALSE  0
-#define JNI_TRUE   1
-
-/* function definitions 
-extern boolean isTip(int number, int maxTips);
-*/
 #endif
