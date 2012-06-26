@@ -14,6 +14,9 @@
 #include "phylogenetic-likelihood-library/axml.h"
 #include "phylogenetic-likelihood-library/globalVariables.h"
 #endif
+/* include access to logcat */
+#include <android/log.h>
+#define APPNAME "RAxMLnative"
 
 /* glue for jni */
 #include <jni.h>
@@ -22,6 +25,7 @@
 #include "raxml_edu_NativeRAxML.h"
 /* include binding to raxml */
 #include "raxml_main.h"
+
 /* small helper functions */
 double gettime() {
 	struct timeval ttime;
@@ -82,6 +86,9 @@ FILE *myfopen(const char *path, const char *mode) {
 JNIEXPORT jint JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
   (JNIEnv * env, jobject obj, jstring dataFileName, jstring treeFileName, jstring outFileName,
    jint model, jboolean useMedian) {
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "Started native RAxML");
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "Started native RAxML");
+	return 0;
 	tree *tr = (tree*)malloc(sizeof(tree));
 	analdef *adef = (analdef*)malloc(sizeof(analdef));
 	double **empiricalFrequencies;

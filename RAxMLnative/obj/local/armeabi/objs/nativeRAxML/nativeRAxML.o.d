@@ -37,6 +37,7 @@
  /home/gollcn/workspace/RAxMLnative/RAxMLnative/jni/phylogenetic-likelihood-library/axml.h \
  /home/gollcn/android/android-ndk-r8/platforms/android-14/arch-arm/usr/include/assert.h \
  /home/gollcn/workspace/RAxMLnative/RAxMLnative/jni/phylogenetic-likelihood-library/globalVariables.h \
+ /home/gollcn/android/android-ndk-r8/platforms/android-14/arch-arm/usr/include/android/log.h \
  /home/gollcn/android/android-ndk-r8/platforms/android-14/arch-arm/usr/include/jni.h \
  /home/gollcn/workspace/RAxMLnative/RAxMLnative/jni/raxml_edu_NativeRAxML.h \
  /home/gollcn/workspace/RAxMLnative/RAxMLnative/jni/raxml_main.h
@@ -114,6 +115,8 @@
 /home/gollcn/android/android-ndk-r8/platforms/android-14/arch-arm/usr/include/assert.h:
 
 /home/gollcn/workspace/RAxMLnative/RAxMLnative/jni/phylogenetic-likelihood-library/globalVariables.h:
+
+/home/gollcn/android/android-ndk-r8/platforms/android-14/arch-arm/usr/include/android/log.h:
 
 /home/gollcn/android/android-ndk-r8/platforms/android-14/arch-arm/usr/include/jni.h:
 
