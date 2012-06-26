@@ -10,9 +10,9 @@ extern "C" {
 /*
  * Class:     raxml_edu_NativeRAxML
  * Method:    raxml_main
- * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZ)I
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IZ)Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
+JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
   (JNIEnv *, jobject, jstring, jstring, jstring, jint, jboolean);
 
 #ifdef __cplusplus

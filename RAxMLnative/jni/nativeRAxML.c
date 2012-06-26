@@ -26,6 +26,8 @@
 /* include binding to raxml */
 #include "raxml_main.h"
 
+/* global variables*/
+char char_buffer[1024] = "";
 /* small helper functions */
 double gettime() {
 	struct timeval ttime;
@@ -63,8 +65,7 @@ FILE *myfopen(const char *path, const char *mode) {
       if(fp)
 	return fp;
       else {	  
-	  printf("\n Error: the file %s you want to open for reading does not exist, exiting ...\n\n", path);
-	  exit(-1);
+	  __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, ("\n Error: the file %s you want to open for reading does not exist, exiting ...\n\n", path));
 	  return (FILE *)NULL;
 	}
     }
@@ -72,9 +73,7 @@ FILE *myfopen(const char *path, const char *mode) {
       if(fp)
 	return fp;
       else {	 
-	  printf("\n Error: the file %s you want to open for writing or appending can not be opened [mode: %s], exiting ...\n\n",
-		 path, mode);
-	  exit(-1);
+	  __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, ("\n Error: the file %s you want to open for writing or appending can not be opened [mode: %s], exiting ...\n\n", path, mode));
 	  return (FILE *)NULL;
 	}
 }
@@ -83,12 +82,10 @@ FILE *myfopen(const char *path, const char *mode) {
 
 }
 
-JNIEXPORT jint JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
+JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
   (JNIEnv * env, jobject obj, jstring dataFileName, jstring treeFileName, jstring outFileName,
    jint model, jboolean useMedian) {
 	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "Started native RAxML");
-	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "Started native RAxML");
-	return 0;
 	tree *tr = (tree*)malloc(sizeof(tree));
 	analdef *adef = (analdef*)malloc(sizeof(analdef));
 	double **empiricalFrequencies;
@@ -124,6 +121,7 @@ JNIEXPORT jint JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
     /* now setup the options we get from the android interface */
 	if(useMedian == JNI_TRUE)
 		tr->useMedian = TRUE;
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "initialized standard values");
 	/* get the data file */
 	const char *nativeStringData = (*env)->GetStringUTFChars(env,dataFileName,0);
 	strcpy(byteFileName,nativeStringData);	 	
@@ -140,10 +138,16 @@ JNIEXPORT jint JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 	strcat(logFileName,"RAxML_log.");  
 	strcat(infoFileName,"RAxML_info.");
 	/* end of file name generation */
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "generated filenames");
 	{
 		size_t i, model;
 		unsigned char *y;
 		FILE *byteFile = myfopen(byteFileName, "rb");	 
+		if(byteFile == NULL) {
+			sprintf(char_buffer,"could not open data file: %s",byteFileName);
+			return (*env)->NewStringUTF(env,char_buffer);
+		}
+		__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "opened file: %s",byteFileName);
 		myBinFread(&(tr->mxtips),                 sizeof(int), 1, byteFile);
 		myBinFread(&(tr->originalCrunchedLength), sizeof(int), 1, byteFile);
 		myBinFread(&(tr->NumberOfModels),         sizeof(int), 1, byteFile);
@@ -186,7 +190,7 @@ JNIEXPORT jint JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 			myBinFread(&len, sizeof(int), 1, byteFile);
 			tr->nameList[i] = (char*)malloc(sizeof(char) * (size_t)len);
 			myBinFread(tr->nameList[i], sizeof(char), len, byteFile);
-			/*printf("%s \n", tr->nameList[i]);*/
+			/*__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, ("%s \n", tr->nameList[i]));*/
 		}  
 		for(i = 1; i <= (size_t)tr->mxtips; i++)
 			addword(tr->nameList[i], tr->nameHash, i);
@@ -222,5 +226,5 @@ JNIEXPORT jint JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 		fclose(byteFile);
 	}
 
-	return 7+model;
+	return (*env)->NewStringUTF(env, "finished RAxML");
 }

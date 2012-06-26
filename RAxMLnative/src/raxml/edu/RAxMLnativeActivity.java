@@ -35,7 +35,7 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
       TextView result = (TextView) findViewById(R.id.result);
 
       public void onClick(View v) {
-    	int res = -1;
+    	String res = "not run yet";
     	/*  Get parameters from the UI */
 	    TextView dataFileNameText = (TextView) findViewById(R.id.DataFileName);
 	    TextView treeFileNameText = (TextView) findViewById(R.id.TreeFileName);
@@ -60,7 +60,7 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
 	    	model = 2;
         res = nativeLib.raxml_main(dataFileName,treeFileName,outFileName,
         		model,useMedian);
-        result.setText(new Integer(res).toString());
+        result.setText(res);
       }
     });
     
