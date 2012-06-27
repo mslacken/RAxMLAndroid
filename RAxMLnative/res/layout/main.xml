@@ -25,36 +25,26 @@
   <TableLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content" >
-      <TableRow
-          android:id="@+id/tableRow1"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content" >
           <TextView
               android:id="@+id/DataFileName"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="dna_data" />
+              android:text="/sdcard/tiny.binary" />
 		  <Button
 		      android:id="@+id/buttonSelectData"
 		      android:layout_width="wrap_content"
 		      android:layout_height="wrap_content"
-		      android:text="..." />
-      </TableRow>
-      <TableRow
-          android:id="@+id/tableRow2"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content" >
+		      android:text="Select data" />
           <TextView
               android:id="@+id/TreeFileName"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:text="start_tree" />
+              android:text="/sdcard/RAxML_parsimonyTree.tiny.0" />
 		  <Button
 		      android:id="@+id/buttonSelectTree"
 		      android:layout_width="wrap_content"
 		      android:layout_height="wrap_content"
-		      android:text="..." />
-      </TableRow>
+		      android:text="Select starting tree" />
       <TableRow
           android:id="@+id/tableRow3"
           android:layout_width="wrap_content"

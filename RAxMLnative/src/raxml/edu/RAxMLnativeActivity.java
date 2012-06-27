@@ -1,9 +1,17 @@
 package raxml.edu;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.text.Editable;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -16,9 +24,7 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
   NativeRAxML nativeLib;
   FileChooser chooser;
   public String dataFileName;
-  public String dataFilePath;
   public String treeFileName;
-  public String treeFilePath;
   public String outFileName;
   public int model;
   public boolean useMedian;
@@ -28,6 +34,9 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
+    // Copy data file to /sdcard
+    copyFile(this,"tiny.binary");
+    copyFile(this,"RAxML_parsimonyTree.tiny.0");
     nativeLib = new NativeRAxML();
     // Setup the UI
     Button buttonCalc = (Button) findViewById(R.id.buttonCalc);
@@ -43,10 +52,6 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
 	    dataFileName = dataFileNameText.getText().toString();
 	    treeFileName = treeFileNameText.getText().toString();
 	    outFileName = outFileNameText.getText().toString();
-	    /*
-    	useMedian = Integer.parseInt(outParameter1.getText().toString());
-	    EditText outParameter1 = (EditText) findViewById(R.id.parameter1);
-    	*/
 	    Switch useMedianSwitch = (Switch) findViewById(R.id.useMedian);
 	    useMedian = useMedianSwitch.isChecked();
 	    RadioButton catButton = (RadioButton) findViewById(R.id.cat);
@@ -86,14 +91,49 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
     TextView dataFileNameText = (TextView) findViewById(R.id.DataFileName);
     TextView treeFileNameText = (TextView) findViewById(R.id.TreeFileName);
     if(requestCode == 0) {
-	    dataFileNameText.setText(newBundle.getString("fileName"));
 	    dataFileName = newBundle.getString("fileName");
-	    dataFilePath = newBundle.getString("pathName");
+	    dataFileNameText.setText(dataFileName);
     }
     if(requestCode == 1) {
-	    treeFileNameText.setText(newBundle.getString("fileName"));
 	    treeFileName = newBundle.getString("fileName");
-	    treeFilePath = newBundle.getString("pathName");
+	    treeFileNameText.setText(treeFileName);
     }
   }
+  public static void copyFile(Activity c, String filename) {
+      AssetManager assetManager = c.getAssets();
+      InputStream in = null;
+      OutputStream out = null;
+      try 
+      {
+          in = assetManager.open(filename);
+          String newFileName = "/mnt/sdcard/"+filename;
+          out = new FileOutputStream(newFileName);
+
+          byte[] buffer = new byte[1024];
+          int read;
+          while ((read = in.read(buffer)) != -1) {
+              out.write(buffer, 0, read);
+          }
+          in.close();
+          in = null;
+          out.flush();
+          out.close();
+          out = null;
+      } catch (Exception e) {
+    	  Log.e("fileCopy Exception",e.getMessage());
+      } finally {
+          if(in!=null){
+              try {
+                  in.close();
+              } catch (IOException e) {
+                  Log.e("ERROR", "Exception while closing input stream",e);
+              }
+          }
+          if(out!=null){
+              try {
+                  out.close();
+              } catch (IOException e) {
+                  Log.e("ERROR", "Exception while closing output stream",e);
+      } } } }
+
 }

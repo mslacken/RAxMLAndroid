@@ -18,7 +18,7 @@ private FileArrayAdapter adapter;
 public void onCreate(Bundle savedInstanceState) {
 	super.onCreate(savedInstanceState);
 	
-	currentDir = new File("/");
+	currentDir = new File("/sdcard/");
 	fill(currentDir);
 }
 private void fill(File f) { 
@@ -59,8 +59,8 @@ private void fill(File f) {
 		//Bundle myBundle = FileChooser.this.getIntent().getExtras();
 		Bundle myBundle = new Bundle();
 		//Toast.makeText(this,myBundle.getString("bundle"), Toast.LENGTH_SHORT).show();
-		myBundle.putString("fileName",o.getName());
-		myBundle.putString("fullPath",o.getPath());
+		myBundle.putString("fileSingleName",o.getName());
+		myBundle.putString("fileName",o.getPath());
 		FileChooser.this.getIntent().putExtras(myBundle);
 		FileChooser.this.setResult(RESULT_OK, getIntent());
 		FileChooser.this.finish();
