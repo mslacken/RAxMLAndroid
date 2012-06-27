@@ -75,11 +75,324 @@ FILE *myfopen(const char *path, const char *mode) {
       else {	 
 	  __android_log_print(ANDROID_LOG_VERBOSE, APPNAME, ("\n Error: the file %s you want to open for writing or appending can not be opened [mode: %s], exiting ...\n\n", path, mode));
 	  return (FILE *)NULL;
+	} } }
+
+static int iterated_bitcount(unsigned int n) {
+    int count=0;    
+    while(n) {
+        count += n & 0x1u ;    
+        n >>= 1 ;
 	}
+    return count;
 }
 
+static void compute_bits_in_16bits(char *bits_in_16bits) {
+    unsigned int i;    
+    
+    /* size is 65536 */
 
+    for (i = 0; i < (0x1u<<16); i++)
+        bits_in_16bits[i] = iterated_bitcount(i);       
+    return ;
+}
 
+const partitionLengths *getPartitionLengths(pInfo *p) {
+  int dataType  = p->dataType, states = p->states, tipLength = p->maxTipStates;
+  assert(states != -1 && tipLength != -1);
+  assert(MIN_MODEL < dataType && dataType < MAX_MODEL);
+  return (&pLengths[dataType]); 
+}
+size_t discreteRateCategories(int rateHetModel) {
+  size_t result;
+  switch(rateHetModel) {
+    case CAT:
+      result = 1;
+      break;
+    case GAMMA:
+      result = 4;
+      break;
+    default:
+      assert(0);
+    }
+  return result;
+}
+int getUndetermined(int dataType) {
+  assert(MIN_MODEL < dataType && dataType < MAX_MODEL);
+  return pLengths[dataType].undetermined;
+}
+
+static void initializePartitions(tree *tr, tree *localTree, int tid, int n) { 
+  size_t model, maxCategories;
+  localTree->threadID = tid; 
+  compute_bits_in_16bits(localTree->bits_in_16bits);
+  assert(tr == localTree);
+  for(model = 0; model < (size_t)tr->NumberOfModels; model++)
+    assert(tr->partitionData[model].width == tr->partitionData[model].upper - tr->partitionData[model].lower);
+  maxCategories = (size_t)localTree->maxCategories;
+  for(model = 0; model < (size_t)localTree->NumberOfModels; model++) {
+      size_t j, width = localTree->partitionData[model].width;
+      const partitionLengths 
+	*pl = getPartitionLengths(&(localTree->partitionData[model]));
+      localTree->partitionData[model].wr = (double *)malloc(sizeof(double) * width);
+      localTree->partitionData[model].wr2 = (double *)malloc(sizeof(double) * width);     
+      /* 
+	 globalScaler needs to be 2 * localTree->mxtips such that scalers of inner AND tip nodes can be added without a case switch
+	 to this end, it must also be initialized with zeros -> calloc
+       */
+
+      localTree->partitionData[model].globalScaler    = (unsigned int *)calloc(2 *(size_t)localTree->mxtips, sizeof(unsigned int));  	         
+      localTree->partitionData[model].left              = (double *)malloc_aligned((size_t)pl->leftLength * (maxCategories + 1) * sizeof(double));
+      localTree->partitionData[model].right             = (double *)malloc_aligned((size_t)pl->rightLength * (maxCategories + 1) * sizeof(double));
+      localTree->partitionData[model].EIGN              = (double*)malloc((size_t)pl->eignLength * sizeof(double));
+      localTree->partitionData[model].EV                = (double*)malloc_aligned((size_t)pl->evLength * sizeof(double));
+      localTree->partitionData[model].EI                = (double*)malloc((size_t)pl->eiLength * sizeof(double));
+      localTree->partitionData[model].substRates        = (double *)malloc((size_t)pl->substRatesLength * sizeof(double));
+      localTree->partitionData[model].frequencies       = (double*)malloc((size_t)pl->frequenciesLength * sizeof(double));
+      localTree->partitionData[model].empiricalFrequencies       = (double*)malloc((size_t)pl->frequenciesLength * sizeof(double));
+      localTree->partitionData[model].tipVector         = (double *)malloc_aligned((size_t)pl->tipVectorLength * sizeof(double));
+      localTree->partitionData[model].symmetryVector    = (int *)malloc((size_t)pl->symmetryVectorLength  * sizeof(int));
+      localTree->partitionData[model].frequencyGrouping = (int *)malloc((size_t)pl->frequencyGroupingLength  * sizeof(int));
+      localTree->partitionData[model].perSiteRates      = (double *)malloc(sizeof(double) * maxCategories);
+      localTree->partitionData[model].nonGTR = FALSE;            
+      localTree->partitionData[model].gammaRates = (double*)malloc(sizeof(double) * 4);
+      localTree->partitionData[model].yVector = (unsigned char **)malloc(sizeof(unsigned char*) * ((size_t)localTree->mxtips + 1));
+      localTree->partitionData[model].xVector = (double **)malloc(sizeof(double*) * (size_t)localTree->mxtips);   
+      for(j = 0; j < (size_t)localTree->mxtips; j++)	        	  	  	  	 
+		  localTree->partitionData[model].xVector[j]   = (double*)NULL;   
+      localTree->partitionData[model].xSpaceVector = (size_t *)calloc((size_t)localTree->mxtips, sizeof(size_t));  
+      localTree->partitionData[model].sumBuffer = (double *)malloc_aligned(width *
+									   (size_t)(localTree->partitionData[model].states) *
+									   discreteRateCategories(localTree->rateHetModel) *
+									   sizeof(double));
+      localTree->partitionData[model].wgt = (int *)malloc_aligned(width * sizeof(int));	  
+      /* rateCategory must be assigned using calloc() at start up there is only one rate category 0 for all sites */
+      localTree->partitionData[model].rateCategory = (int *)calloc(width, sizeof(int));
+      if(width > 0 && localTree->saveMemory) {
+	  localTree->partitionData[model].gapVectorLength = ((int)width / 32) + 1;
+	  localTree->partitionData[model].gapVector = (unsigned int*)calloc((size_t)localTree->partitionData[model].gapVectorLength * 2 * (size_t)localTree->mxtips, sizeof(unsigned int));	  	    	  	  
+	  localTree->partitionData[model].gapColumn = (double *)malloc_aligned(((size_t)localTree->mxtips) *								      
+									       ((size_t)(localTree->partitionData[model].states)) *
+									       discreteRateCategories(localTree->rateHetModel) * sizeof(double));
+	} else {
+	   localTree->partitionData[model].gapVectorLength = 0;
+	   localTree->partitionData[model].gapVector = (unsigned int*)NULL; 	  	    	   
+	   localTree->partitionData[model].gapColumn = (double*)NULL;	    	    	   
+	} }
+#if ! (defined(_USE_PTHREADS) || defined(_FINE_GRAIN_MPI))
+  /* figure in tip sequence data per-site pattern weights */ 
+  for(model = 0; model < (size_t)tr->NumberOfModels; model++) {
+      size_t j, lower = tr->partitionData[model].lower, width = tr->partitionData[model].upper - lower;  
+      for(j = 1; j <= (size_t)tr->mxtips; j++)
+		tr->partitionData[model].yVector[j] = &(tr->yVector[j][tr->partitionData[model].lower]);
+      memcpy((void*)(&(tr->partitionData[model].wgt[0])), (void*)(&(tr->aliaswgt[lower])), sizeof(int) * width);
+    }  
+#else
+  {
+    size_t model,  j, i, globalCounter = 0, localCounter  = 0, offset, countOffset, myLength = 0;
+    for(model = 0; model < (size_t)localTree->NumberOfModels; model++)
+      myLength += localTree->partitionData[model].width;         
+    /* assign local memory for storing sequence data */
+    localTree->y_ptr = (unsigned char *)malloc(myLength * (size_t)(localTree->mxtips) * sizeof(unsigned char));
+    assert(localTree->y_ptr != NULL);
+    for(i = 0; i < (size_t)localTree->mxtips; i++) {
+	for(model = 0, offset = 0, countOffset = 0; model < (size_t)localTree->NumberOfModels; model++) {
+	    localTree->partitionData[model].yVector[i+1]   = &localTree->y_ptr[i * myLength + countOffset];
+	    countOffset +=  localTree->partitionData[model].width;
+	  }
+	assert(countOffset == myLength);
+      }
+
+    /* figure in data */
+    if(tr->manyPartitions)
+      for(model = 0, globalCounter = 0; model < (size_t)localTree->NumberOfModels; model++) {
+	  if(isThisMyPartition(localTree, tid, model)) {
+	      assert(localTree->partitionData[model].upper - localTree->partitionData[model].lower == localTree->partitionData[model].width);
+	      for(localCounter = 0, i = (size_t)localTree->partitionData[model].lower;  i < (size_t)localTree->partitionData[model].upper; i++, localCounter++) {	    
+		  localTree->partitionData[model].wgt[localCounter] = tr->aliaswgt[globalCounter];
+		  for(j = 1; j <= (size_t)localTree->mxtips; j++)
+		    localTree->partitionData[model].yVector[j][localCounter] = tr->yVector[j][globalCounter]; 	     
+		  globalCounter++;
+		} }
+	  else
+	    globalCounter += (localTree->partitionData[model].upper - localTree->partitionData[model].lower);
+	}
+    else
+      for(model = 0, globalCounter = 0; model < (size_t)localTree->NumberOfModels; model++) {
+	  for(localCounter = 0, i = (size_t)localTree->partitionData[model].lower;  i < (size_t)localTree->partitionData[model].upper; i++) {
+	      if(i % (size_t)n == (size_t)tid) {
+		  localTree->partitionData[model].wgt[localCounter]          = tr->aliaswgt[globalCounter];	      	     		 
+		  for(j = 1; j <= (size_t)localTree->mxtips; j++)
+		    localTree->partitionData[model].yVector[j][localCounter] = tr->yVector[j][globalCounter]; 	     
+		  localCounter++;
+		}
+	      globalCounter++;
+	    } } }
+#endif
+  /* initialize gap bit vectors at tips when memory saving option is enabled */
+  if(localTree->saveMemory) {
+      for(model = 0; model < (size_t)localTree->NumberOfModels; model++) {
+	  int undetermined = getUndetermined(localTree->partitionData[model].dataType);
+	  size_t i, j, width =  localTree->partitionData[model].width;
+	  if(width > 0) {	   	    	      	    	     
+	      for(j = 1; j <= (size_t)(localTree->mxtips); j++)
+		for(i = 0; i < width; i++)
+		  if(localTree->partitionData[model].yVector[j][i] == undetermined)
+		    localTree->partitionData[model].gapVector[localTree->partitionData[model].gapVectorLength * j + i / 32] |= mask32[i % 32];	    
+	    }     
+} } }
+
+const unsigned int *getBitVector(int dataType) {
+	assert(MIN_MODEL < dataType && dataType < MAX_MODEL);
+	return pLengths[dataType].bitVector;
+}
+
+void storeExecuteMaskInTraversalDescriptor(tree *tr) {
+   int model;
+   for(model = 0; model < tr->NumberOfModels; model++)
+     tr->td[0].executeModel[model] = tr->executeModel[model];
+}
+
+void getxnode (nodeptr p) {
+  nodeptr  s;
+  if ((s = p->next)->x || (s = s->next)->x) {
+      p->x = s->x;
+      s->x = 0;
+    }
+  assert(p->x);
+}
+
+unsigned int precomputed16_bitcount (unsigned int n, char *bits_in_16bits) {
+	/* works only for 32-bit int*/
+    return bits_in_16bits [n         & 0xffffu]
+        +  bits_in_16bits [(n >> 16) & 0xffffu] ;
+}
+
+void storeValuesInTraversalDescriptor(tree *tr, double *value) {
+   int model;
+   for(model = 0; model < tr->NumberOfModels; model++)
+     tr->td[0].parameterValues[model] = value[model];
+}
+
+void printLog(tree *tr) {
+  FILE *logFile;
+  double t;
+  t = gettime() - masterTime;
+  logFile = myfopen(logFileName, "ab");
+  fprintf(logFile, "%f %f\n", t, tr->likelihood);
+  fclose(logFile);
+}
+
+void printBothOpen(const char* format, ... ) {
+	/*
+  FILE *f = myfopen(infoFileName, "ab");
+
+  va_list args;
+  va_start(args, format);
+  vfprintf(f, format, args );
+  va_end(args);
+
+  va_start(args, format);
+  vprintf(format, args );
+  va_end(args);
+
+  fclose(f);
+  */
+}
+
+void printResult(tree *tr, analdef *adef, boolean finalPrint) {
+  FILE *logFile;
+  char temporaryFileName[1024] = "";
+  strcpy(temporaryFileName, resultFileName);
+  switch(adef->mode) {    
+    case TREE_EVALUATION:
+      Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, finalPrint, SUMMARIZE_LH, FALSE, FALSE);
+      logFile = myfopen(temporaryFileName, "wb");
+      fprintf(logFile, "%s", tr->tree_string);
+      fclose(logFile);
+
+      if(adef->perGeneBranchLengths)
+	printTreePerGene(tr, adef, temporaryFileName, "wb");
+      break;
+    case BIG_RAPID_MODE:     
+      if(finalPrint) {
+	  switch(tr->rateHetModel) {
+	    case GAMMA:
+	    case GAMMA_I:
+	      Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE, finalPrint,
+			  SUMMARIZE_LH, FALSE, FALSE);
+	      logFile = myfopen(temporaryFileName, "wb");
+	      fprintf(logFile, "%s", tr->tree_string);
+	      fclose(logFile);
+	      if(adef->perGeneBranchLengths)
+		printTreePerGene(tr, adef, temporaryFileName, "wb");
+	      break;
+	    case CAT:
+	      /*Tree2String(tr->tree_string, tr, tr->start->back, FALSE, TRUE, FALSE, FALSE, finalPrint, adef,
+		NO_BRANCHES, FALSE, FALSE);*/
+	      Tree2String(tr->tree_string, tr, tr->start->back, TRUE, TRUE, FALSE, FALSE,
+			  TRUE, SUMMARIZE_LH, FALSE, FALSE);
+	      logFile = myfopen(temporaryFileName, "wb");
+	      fprintf(logFile, "%s", tr->tree_string);
+	      fclose(logFile);
+	      break;
+	    default:
+	      assert(0);
+	    }
+	} else {
+	  Tree2String(tr->tree_string, tr, tr->start->back, FALSE, TRUE, FALSE, FALSE, finalPrint,
+		      NO_BRANCHES, FALSE, FALSE);
+	  logFile = myfopen(temporaryFileName, "wb");
+	  fprintf(logFile, "%s", tr->tree_string);
+	  fclose(logFile);
+	}    
+      break;
+    default:
+      __android_log_print(ANDROID_LOG_VERBOSE, APPNAME,"FATAL ERROR call to printResult from undefined STATE %d\n", adef->mode);
+      exit(-1);
+      break;
+    }
+}
+static void finalizeInfoFile(tree *tr, analdef *adef) {
+  double t;
+  t = gettime() - masterTime;
+  accumulatedTime = accumulatedTime + t;
+  switch(adef->mode)
+    {	
+    case  BIG_RAPID_MODE:	 
+      printBothOpen("\n\nOverall Time for 1 Inference %f\n", t);
+      printBothOpen("\nOverall accumulated Time (in case of restarts): %f\n\n", accumulatedTime);
+      printBothOpen("Likelihood   : %f\n", tr->likelihood);
+      printBothOpen("\n\n");	  	  
+      printBothOpen("Final tree written to:                 %s\n", resultFileName);
+      printBothOpen("Execution Log File written to:         %s\n", logFileName);
+      printBothOpen("Execution information file written to: %s\n",infoFileName);	
+      break;
+    default:
+      assert(0);
+    }
+}
+double randum (long  *seed) {
+  long  sum, mult0, mult1, seed0, seed1, seed2, newseed0, newseed1, newseed2;
+  double res;
+
+  mult0 = 1549;
+  seed0 = *seed & 4095;
+  sum  = mult0 * seed0;
+  newseed0 = sum & 4095;
+  sum >>= 12;
+  seed1 = (*seed >> 12) & 4095;
+  mult1 =  406;
+  sum += mult0 * seed1 + mult1 * seed0;
+  newseed1 = sum & 4095;
+  sum >>= 12;
+  seed2 = (*seed >> 24) & 255;
+  sum += mult0 * seed2 + mult1 * seed1;
+  newseed2 = sum & 255;
+
+  *seed = newseed2 << 24 | newseed1 << 12 | newseed0;
+  res = 0.00390625 * (newseed2 + 0.000244140625 * (newseed1 + 0.000244140625 * newseed0));
+
+  return res;
 }
 
 JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
@@ -116,11 +429,8 @@ JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 	tr->grouped = FALSE;
 	tr->constrained = FALSE;
 	tr->gapyness               = 0.0; 
-	tr->useMedian = FALSE;
 	/********* tr inits end*************/
     /* now setup the options we get from the android interface */
-	if(useMedian == JNI_TRUE)
-		tr->useMedian = TRUE;
 	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "initialized standard values");
 	/* get the data file */
 	const char *nativeStringData = (*env)->GetStringUTFChars(env,dataFileName,0);
@@ -225,6 +535,45 @@ JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 		myBinFread(y, sizeof(unsigned char), ((size_t)tr->originalCrunchedLength) * ((size_t)tr->mxtips), byteFile);
 		fclose(byteFile);
 	}
+	/* 
+	 allocate the required data structures for storing likelihood vectors etc 
+	*/
+	initializePartitions(tr, tr, 0, 0);
+	initModel(tr, empiricalFrequencies);                      
+	/* 
+	 not important, only used to keep track of total accumulated exec time 
+	 when checkpointing and restarts were used 
+	 */
+	accumulatedTime = 0.0;
+      /* get the starting tree: here we just parse the tree passed via the command line 
+	 and do an initial likelihood computation traversal 
+	 which we maybe should skeip, TODO */
+	switch(tr->startingTree) {
+	case randomTree:
+	  makeRandomTree(tr);
+	  break;
+	case givenTree:
+	  getStartingTree(tr);     
+	  break;
+	case parsimonyTree:	     
+	  /* runs only on process/thread 0 ! */
+	  allocateParsimonyDataStructures(tr);
+	  makeParsimonyTreeFast(tr);
+	  freeParsimonyDataStructures(tr);
+	  break;
+	default:
+	  assert(0);
+	}
+	/* 
+	here we do an initial full tree traversal on the starting tree using the Felsenstein pruning algorithm 
+	This should basically be the first call to the library that actually computes something :-)
+	*/
+	evaluateGeneric(tr, tr->start, TRUE);	 
+	/* the treeEvaluate() function repeatedly iterates over the entire tree to optimize branch lengths until convergence */
+	treeEvaluate(tr, 1); 	 	 	 	 	 
+	/* now start the ML search algorithm */
+	computeBIGRAPID(tr, adef, TRUE); 	     
+	finalizeInfoFile(tr, adef);
 
 	return (*env)->NewStringUTF(env, "finished RAxML");
 }

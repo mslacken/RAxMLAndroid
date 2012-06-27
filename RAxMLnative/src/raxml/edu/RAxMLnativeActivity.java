@@ -52,8 +52,10 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
 	    dataFileName = dataFileNameText.getText().toString();
 	    treeFileName = treeFileNameText.getText().toString();
 	    outFileName = outFileNameText.getText().toString();
+	    /*
 	    Switch useMedianSwitch = (Switch) findViewById(R.id.useMedian);
 	    useMedian = useMedianSwitch.isChecked();
+	    */
 	    RadioButton catButton = (RadioButton) findViewById(R.id.cat);
 	    RadioButton gammaButton = (RadioButton) findViewById(R.id.gamma);
 	    RadioButton gamma_iButton = (RadioButton) findViewById(R.id.gamma_i);
@@ -68,7 +70,7 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
         result.setText(res);
       }
     });
-    
+    /*
     Button buttonSelectData = (Button) findViewById(R.id.buttonSelectData);
     buttonSelectData.setOnClickListener(new OnClickListener() {
 		public void onClick(View v) {
@@ -78,6 +80,21 @@ public class RAxMLnativeActivity<CurrentActivity> extends Activity {
     });
     Button buttonSelectTree = (Button) findViewById(R.id.buttonSelectTree);
     buttonSelectTree.setOnClickListener(new OnClickListener() {
+		public void onClick(View v) {
+			Intent myIntent = new Intent(RAxMLnativeActivity.this, FileChooser.class);
+			RAxMLnativeActivity.this.startActivityForResult(myIntent,1);
+		}
+    });
+    */
+    TextView dataFileNameText = (TextView) findViewById(R.id.DataFileName);
+    dataFileNameText.setOnClickListener(new OnClickListener() {
+		public void onClick(View v) {
+			Intent myIntent = new Intent(RAxMLnativeActivity.this, FileChooser.class);
+			RAxMLnativeActivity.this.startActivityForResult(myIntent,0);
+		}
+    });
+    TextView treeFileNameText = (TextView) findViewById(R.id.TreeFileName);
+    treeFileNameText.setOnClickListener(new OnClickListener() {
 		public void onClick(View v) {
 			Intent myIntent = new Intent(RAxMLnativeActivity.this, FileChooser.class);
 			RAxMLnativeActivity.this.startActivityForResult(myIntent,1);
