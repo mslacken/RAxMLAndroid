@@ -50,22 +50,19 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:text="/sdcard/RAxML_parsimonyTree.tiny.0" />
-      <TableRow
-          android:id="@+id/tableRow3"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content" >
 		  <TextView
 		      android:id="@+id/parameter1Desc"
 		      android:layout_width="match_parent"
 		      android:layout_height="wrap_content"
-		      android:text="Output file name:"/>
+		      android:text="Output file pattern:"
+              android:textAppearance="?android:attr/textAppearanceMedium" />
 		  <EditText
 		      android:id="@+id/outFileName"
 		      android:layout_width="match_parent"
 		      android:layout_height="wrap_content"
-		      android:text="RAxMLout"
+		      android:text="/sdcard/RAxMLout"
+		      android:inputType="textNoSuggestions"
 		      android:textAppearance="?android:attr/textAppearanceMedium" />
-      </TableRow>
       <!-- 
       <TableRow
           android:id="@+id/tableRow4"

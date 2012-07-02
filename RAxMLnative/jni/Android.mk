@@ -19,6 +19,9 @@ LOCAL_SRC_FILES := nativeRAxML.c android_helpers.c \
 	phylogenetic-likelihood-library/restartHashTable.c \
 	phylogenetic-likelihood-library/fastDNAparsimony.c
 
-LOCAL_LDLIBS := -llog
+LOCAL_LDLIBS := -llog 
+
+#LOCAL_CFLAGS := -gstabs+ -ggdb
+#-ggdb -gstabs+
 
 include $(BUILD_SHARED_LIBRARY)

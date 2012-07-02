@@ -274,12 +274,15 @@ void storeValuesInTraversalDescriptor(tree *tr, double *value) {
 }
 
 void printLog(tree *tr) {
-  FILE *logFile;
   double t;
   t = gettime() - masterTime;
+  __android_log_print(ANDROID_LOG_VERBOSE, APPNAME,"%f %f\n", t, tr->likelihood);
+  /*
+  FILE *logFile;
   logFile = myfopen(logFileName, "ab");
   fprintf(logFile, "%f %f\n", t, tr->likelihood);
   fclose(logFile);
+  */
 }
 
 void printBothOpen(const char* format, ... ) {
@@ -441,14 +444,18 @@ JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 	/* get the rate model */
 	tr->rateHetModel = model;
 	/* generate the ouput file names */
-	strcpy(resultFileName,(*env)->GetStringUTFChars(env,outFileName,0));
-	strcpy(logFileName,(*env)->GetStringUTFChars(env,outFileName,0));  
-	strcpy(infoFileName,(*env)->GetStringUTFChars(env,outFileName,0));
-	strcat(resultFileName,"RAxML_result.");
-	strcat(logFileName,"RAxML_log.");  
-	strcat(infoFileName,"RAxML_info.");
+	const char *nativeStringResult = (*env)->GetStringUTFChars(env,outFileName,0);
+	strcpy(resultFileName,nativeStringResult);
+	strcpy(logFileName,nativeStringResult);  
+	strcpy(infoFileName,nativeStringResult);
+	
+	strcat(resultFileName,".result");
+	strcat(logFileName,".log");  
+	strcat(infoFileName,".info");
+
 	/* end of file name generation */
-	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "generated filenames");
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "generated filenames:\n%s\n%s\n%s",
+			resultFileName,logFileName,infoFileName);
 	{
 		size_t i, model;
 		unsigned char *y;
@@ -539,7 +546,9 @@ JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 	 allocate the required data structures for storing likelihood vectors etc 
 	*/
 	initializePartitions(tr, tr, 0, 0);
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME,"initalized partitions");
 	initModel(tr, empiricalFrequencies);                      
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME,"init of model was successful");
 	/* 
 	 not important, only used to keep track of total accumulated exec time 
 	 when checkpointing and restarts were used 
@@ -558,6 +567,7 @@ JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 	case parsimonyTree:	     
 	  /* runs only on process/thread 0 ! */
 	  allocateParsimonyDataStructures(tr);
+	  __android_log_print(ANDROID_LOG_VERBOSE, APPNAME,"allocated parsimony data strucre");
 	  makeParsimonyTreeFast(tr);
 	  freeParsimonyDataStructures(tr);
 	  break;
@@ -572,8 +582,11 @@ JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 	/* the treeEvaluate() function repeatedly iterates over the entire tree to optimize branch lengths until convergence */
 	treeEvaluate(tr, 1); 	 	 	 	 	 
 	/* now start the ML search algorithm */
+	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME,"starting ML search");
 	computeBIGRAPID(tr, adef, TRUE); 	     
+	/*
 	finalizeInfoFile(tr, adef);
-
-	return (*env)->NewStringUTF(env, "finished RAxML");
+    */
+	sprintf(char_buffer, "finished RAxML after %g s",gettime() - masterTime);
+	return (*env)->NewStringUTF(env,char_buffer);
 }
