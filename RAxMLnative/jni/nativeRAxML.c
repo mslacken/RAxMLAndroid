@@ -1,6 +1,7 @@
 /* include NDK binding */
 #ifndef RAXML_MAIN_H
 #define RAXML_MAIN_H
+#if 0
 /* system includes, shoudl be compatible to stdclib */
 #include <math.h>
 #include <time.h>
@@ -13,8 +14,8 @@
 /* raxml includes */
 #include "phylogenetic-likelihood-library/axml.h"
 #include "phylogenetic-likelihood-library/globalVariables.h"
-#endif
 /* include access to logcat */
+#endif
 #include <android/log.h>
 #define APPNAME "RAxMLnative"
 
@@ -25,9 +26,11 @@
 #include "raxml_edu_NativeRAxML.h"
 /* include binding to raxml */
 #include "raxml_main.h"
+#include "phylogenetic-likelihood-library/axml.c"
 
 /* global variables*/
 char char_buffer[1024] = "";
+#if 0
 /* small helper functions */
 double gettime() {
 	struct timeval ttime;
@@ -397,6 +400,7 @@ double randum (long  *seed) {
 
   return res;
 }
+#endif
 
 JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
   (JNIEnv * env, jobject obj, jstring dataFileName, jstring treeFileName, jstring outFileName,
@@ -414,9 +418,8 @@ JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 	masterTime = gettime();         
 	/* initialize the analysis parameters in struct adef to default values */
 	initAdef(adef);
-	/* no getargs as we get all parameters with pseudo main call */
 
-	/*********** tr inits **************/
+	/*********** tr inits usually made by getargs **************/
 	tr->numberOfThreads = 1; 
 	tr->doCutoff = TRUE;
 	tr->secondaryStructureModel = SEC_16; /* default setting */
@@ -432,6 +435,7 @@ JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 	tr->grouped = FALSE;
 	tr->constrained = FALSE;
 	tr->gapyness               = 0.0; 
+	tr->useMedian = FALSE;
 	/********* tr inits end*************/
     /* now setup the options we get from the android interface */
 	__android_log_print(ANDROID_LOG_VERBOSE, APPNAME, "initialized standard values");
@@ -590,3 +594,4 @@ JNIEXPORT jstring JNICALL Java_raxml_edu_NativeRAxML_raxml_1main
 	sprintf(char_buffer, "finished RAxML after %g s",gettime() - masterTime);
 	return (*env)->NewStringUTF(env,char_buffer);
 }
+#endif

@@ -21,7 +21,7 @@ LOCAL_SRC_FILES := nativeRAxML.c android_helpers.c \
 
 LOCAL_LDLIBS := -llog 
 
-#LOCAL_CFLAGS := -gstabs+ -ggdb
+LOCAL_CFLAGS := -gstabs+ -ggdb
 #-ggdb -gstabs+
 
 include $(BUILD_SHARED_LIBRARY)
